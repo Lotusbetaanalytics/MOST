@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: lotusbetaanalyticsvmsnode 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lotusbetaanalyticsvmsnode
+  template:
+    metadata:
+      labels:
+        app: lotusbetaanalyticsvmsnode 
+    spec:
+      containers:
+        - name: lotusbetaanalyticsvmsnode 
+          image: busdev.azurecr.io/lotusbetaanalyticsvmsnode
+          ports:
+          - containerPort: 8000
