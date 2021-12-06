@@ -14,6 +14,9 @@ const EmployeeSchema = new mongoose.Schema({
     type: String,
     unique: true,
   },
+  designation: {
+    type: String,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
