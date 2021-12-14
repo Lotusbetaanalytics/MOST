@@ -16,7 +16,8 @@ const socketIO = require("socket.io");
 const http = require("http");
 
 //load env vars
-dotenv.config({ path: "./config/config.env" });
+// dotenv.config({ path: "./config/config.env" });
+dotenv.config({ path: "./config/devops.env" });
 
 //connect to database
 connectDB();
