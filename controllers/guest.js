@@ -4,6 +4,14 @@ const ReturningVisitor = require("../models/ReturningVisitor");
 const Visitor = require("../models/visitor");
 const Employee = require("../models/Employee");
 const sendEmail = require("../utils/sendEmail");
+const sgMail = require('@sendgrid/mail')
+sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+
+
+
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const client = require("twilio")(accountSid, authToken);
 
 // @desc    Get single visitor info
 // @route   GET/api/v1/
@@ -18,7 +26,7 @@ exports.getVisitorsInfo = asyncHandler(async (req, res, next) => {
     })
     .populate({
       path: "host",
-      select: "firstname lastname",
+      select: "fullname",
     });
   res.status(200).json({ success: true, data: visitors });
 });
@@ -45,21 +53,21 @@ exports.sendToHost = asyncHandler(async (req, res, next) => {
                 <tbody>
                     <tr>
                         <td align="center" valign="top" bgcolor="#640ad2"
-                            style="background:linear-gradient(0deg, rgba(100, 10, 210, 0.8), rgba(100, 10, 210, 0.8)),url(https://lbanstaffportal.herokuapp.com/static/media/tech.45a93050.jpg);background-size:cover; background-position:top;height:230">
+                            style="background:linear-gradient(0deg, rgba(100, 10, 210, 0.8), rgba(100, 10, 210, 0.8)),url(https://vmslag-test.azurewebsites.net/static/media/logo.4bf34e25.png);background-size:cover; background-position:top;height:230">
                             <table class="col-600" width="600" height="200" border="0" align="center"
                                 cellpadding="0" cellspacing="0">
                                 <tbody>
                                     <tr>
                                         <td align="center" style="line-height: 0px;">
                                             <img style="display:block; line-height:0px; font-size:0px; border:0px;"
-                                                src="https://lbanstaffportal.herokuapp.com/static/media/logo.49e95c77.png"
+                                                src="https://vmslag-test.azurewebsites.net/static/media/logo.4bf34e25.png"
                                                 width="70" height="70" alt="logo">
                                         </td>
                                     </tr>
                                     <tr>
                                         <td align="center"
                                             style="font-family: 'Raleway', sans-serif; font-size:37px; color:#ffffff;font-weight: bold;">
-                                            Lotus Beta Analytics
+                                            Lagos State Ministry of Science & Technology
                                         </td>
                                     </tr>
                                     <tr>
@@ -119,6 +127,26 @@ exports.sendToHost = asyncHandler(async (req, res, next) => {
     </tr>
 </tbody>
 </table>`;
+
+// const msg = {
+//   to: host.email, // Change to your recipient
+//   from: 'vmanagement@lagosstate.gov.ng', // Change to your verified sender
+//   subject: "New Guest",
+//   html: html,
+// }
+// sgMail
+//   .send(msg)
+//   .then(() => {
+//     console.log('Email sent')
+//       res.status(200).json({ success: true, data: "Email Sent" });
+//   })
+//   .catch((error) => {
+//     console.error(error)
+//     return next(new ErrorResponse("Email could not be sent", 500));
+//   })
+
+
+
   req.body.status = "Awaiting Host";
   try {
     await sendEmail({
@@ -130,6 +158,15 @@ exports.sendToHost = asyncHandler(async (req, res, next) => {
       new: true,
       runValidators: true,
     });
+    client.messages
+      .create({
+        body: `Hi ${host.fullname}!,  ${req.body.name} is here to see you, Kindly approve or reject from your Portal`,
+        messagingServiceSid: `${process.env.TWILIO_SID}`,
+        from: "+19472085695",
+        to: `+234${host.mobile}`,
+      })
+      .then((message) => console.log(message.sid))
+      .done();
     res.status(200).json({ success: true, data: "Email Sent" });
   } catch (err) {
     console.log(err);
