@@ -16,8 +16,8 @@ const socketIO = require("socket.io");
 const http = require("http");
 
 //load env vars
-// dotenv.config({ path: "./config/config.env" });
-dotenv.config({ path: "./config/devops.env" });
+dotenv.config({ path: "./config/config.env" });
+// dotenv.config({ path: "./config/devops.env" });
 
 //connect to database
 connectDB();
@@ -83,6 +83,7 @@ app.use("/api/v1/frontdesk/prebook", prebook);
 app.use("/api/v1/prebook", prebook);
 app.use("/api/v1/frontdesk/employee", employee);
 app.use("/api/v1/employee", employee);
+app.use("/api/v1/guest", guest);
 
 app.use(errorHandler);
 

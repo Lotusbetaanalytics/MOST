@@ -11,8 +11,8 @@ const PreBookedSchema = new mongoose.Schema({
   email: {
     type: String,
   },
-  host: {
-    type: String,
+ host: {
+    type: mongoose.Schema.ObjectId,
     required: [true, "Please add host"],
   },
   date: { type: String },

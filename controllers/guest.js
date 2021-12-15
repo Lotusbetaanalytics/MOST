@@ -2,6 +2,7 @@ const ErrorResponse = require("../utils/errorResponse");
 const asyncHandler = require("../middleware/async");
 const ReturningVisitor = require("../models/ReturningVisitor");
 const Visitor = require("../models/visitor");
+const Frontdesk = require("../models/Frontdesk");
 const Employee = require("../models/Employee");
 const sendEmail = require("../utils/sendEmail");
 const sgMail = require('@sendgrid/mail')
@@ -36,14 +37,12 @@ exports.getVisitorsInfo = asyncHandler(async (req, res, next) => {
 // @access   Private
 exports.sendToHost = asyncHandler(async (req, res, next) => {
   //Create reset url
-  const approve = `${req.protocol}://${req.get(
-    "host"
-  )}/api/v1/frontdesk/guest/approve/${req.body.id}`;
-  const reject = `${req.protocol}://${req.get(
-    "host"
-  )}/api/v1/frontdesk/guest/reject/${req.body.id}`;
+ 
 
   const host = await Employee.findById(req.body.host);
+   const approve = `${req.protocol}://${req.get(
+    "host"
+  )}/staff/${host._id}`;
 
   const html = `<table width="100%" border="0" align="center" cellpadding="0" cellspacing="0">
 <tbody>
@@ -53,7 +52,7 @@ exports.sendToHost = asyncHandler(async (req, res, next) => {
                 <tbody>
                     <tr>
                         <td align="center" valign="top" bgcolor="#640ad2"
-                            style="background:linear-gradient(0deg, rgba(100, 10, 210, 0.8), rgba(100, 10, 210, 0.8)),url(https://vmslag-test.azurewebsites.net/static/media/logo.4bf34e25.png);background-size:cover; background-position:top;height:230">
+                            style="background:linear-gradient(0deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)),url(https://vmslag-test.azurewebsites.net/static/media/logo.4bf34e25.png);background-size:cover; background-position:top;height:230">
                             <table class="col-600" width="600" height="200" border="0" align="center"
                                 cellpadding="0" cellspacing="0">
                                 <tbody>
@@ -66,15 +65,8 @@ exports.sendToHost = asyncHandler(async (req, res, next) => {
                                     </tr>
                                     <tr>
                                         <td align="center"
-                                            style="font-family: 'Raleway', sans-serif; font-size:37px; color:#ffffff;font-weight: bold;">
+                                            style="font-family: 'Raleway', sans-serif; font-size:20px; color:#000;font-weight: bold;">
                                             Lagos State Ministry of Science & Technology
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td align="center"
-                                            style="font-family: 'Lato', sans-serif; font-size:15px; color:#ffffff;font-weight: 300;">
-                                            Our goal as an organization is to provide our customers with the best
-                                            value
                                         </td>
                                     </tr>
                                 </tbody>
@@ -97,7 +89,7 @@ exports.sendToHost = asyncHandler(async (req, res, next) => {
                     <tr>
                         <td align="center"
                             style="font-family: 'Raleway', sans-serif; font-size:22px; font-weight: bold; color:#2a3a4b;">
-                            Dear ${host.firstname}
+                            Dear ${host.fullname}
                             
                         </td>
                     </tr>
@@ -116,8 +108,7 @@ exports.sendToHost = asyncHandler(async (req, res, next) => {
                            <img src="${req.body.photo}" alt="${req.body.name}" style="width:200px;height:200px;border-radius:50%" />
                             <br />
                             <br />
-                            <a href="${approve}" style="padding:1rem 2rem;color:white;background:green;border-radius:20px;text-decoration:none">Approve</a>
-                            <a href="${reject}" style="padding:1rem 2rem;color:white;background:crimson;border-radius:20px;text-decoration:none">Reject</a>
+                            <a href="${approve}" style="padding:1rem 2rem;color:white;background:green;border-radius:20px;text-decoration:none">Click Here</a>
                         </td>
                     </tr>
 
@@ -147,7 +138,8 @@ exports.sendToHost = asyncHandler(async (req, res, next) => {
 
 
 
-  req.body.status = "Awaiting Host";
+  // req.body.status = "Awaiting Host";
+  req.body.status = "Pending";
   try {
     await sendEmail({
       email: host.email,
@@ -158,9 +150,11 @@ exports.sendToHost = asyncHandler(async (req, res, next) => {
       new: true,
       runValidators: true,
     });
+
+
     client.messages
       .create({
-        body: `Hi ${host.fullname}!,  ${req.body.name} is here to see you, Kindly approve or reject from your Portal`,
+        body: `Hi ${host.fullname}!,  ${req.body.name} is here to see you, Check your email for more information`,
         messagingServiceSid: `${process.env.TWILIO_SID}`,
         from: "+19472085695",
         to: `+234${host.mobile}`,
@@ -179,10 +173,24 @@ exports.sendToHost = asyncHandler(async (req, res, next) => {
 // @access   Private
 exports.approveGuest = asyncHandler(async (req, res, next) => {
   req.body.status = "Approved";
-  await ReturningVisitor.findByIdAndUpdate(req.params.id, req.body, {
+  await ReturningVisitor.findByIdAndUpdate(req.body.id, req.body, {
     new: true,
     runValidators: true,
   });
+const guest = await Frontdesk.find() 
+
+      client.messages
+      .create({
+        body: `Hi Frontdesk!,  ${req.body.name} has been approved`,
+        messagingServiceSid: `${process.env.TWILIO_SID}`,
+        from: "+19472085695",
+        to: `+234${guest[0].mobile}`,
+      })
+      .then((message) => console.log(message.sid))
+      .done();
+
+
+
   res.status(200).json({ success: true, data: "Guest has been Approved" });
   // io.on("connection", (socket) => {
   //   socket.on("message", () => {
@@ -196,10 +204,21 @@ exports.approveGuest = asyncHandler(async (req, res, next) => {
 // @access   Private
 exports.rejectGuest = asyncHandler(async (req, res, next) => {
   req.body.status = "Rejected";
-  await ReturningVisitor.findByIdAndUpdate(req.params.id, req.body, {
+  await ReturningVisitor.findByIdAndUpdate(req.body.id, req.body, {
     new: true,
     runValidators: true,
   });
+  const guest = await Frontdesk.find() 
+
+      client.messages
+      .create({
+        body: `Hi Frontdesk!,  ${req.body.name} has been rejected`,
+        messagingServiceSid: `${process.env.TWILIO_SID}`,
+        from: "+19472085695",
+        to: `+234${guest[0].mobile}`,
+      })
+      .then((message) => console.log(message.sid))
+      .done();
   res.status(200).json({ success: true, data: "Guest has been Rejected" });
 });
 
@@ -220,6 +239,8 @@ exports.checkinGuest = asyncHandler(async (req, res, next) => {
 // @access   Private
 exports.checkOutGuest = asyncHandler(async (req, res, next) => {
   req.body.status = "CheckedOut";
+  req.body.timeOut = new Date().toLocaleString();
+
   const find = await Visitor.findOne({
     mobile: req.body.mobile,
   })

@@ -16,6 +16,10 @@ const FrontdeskSchema = new mongoose.Schema({
     required: [true, "Please add Email"],
     unique: true,
   },
+  mobile: {
+    type: String,
+    required: [true, "Please add Mobile"],
+  },
   role: {
     type: String,
     enum: ["Frontdesk", "Staff"],

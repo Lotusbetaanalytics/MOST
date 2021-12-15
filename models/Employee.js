@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
+
 
 const EmployeeSchema = new mongoose.Schema({
   fullname: {
@@ -22,5 +24,11 @@ const EmployeeSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+//Sign JWT and return
+EmployeeSchema.methods.getSignedJwtToken = function () {
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE,
+  });
+};
 
 module.exports = mongoose.model("Employee", EmployeeSchema);
