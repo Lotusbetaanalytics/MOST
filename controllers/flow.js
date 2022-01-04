@@ -96,7 +96,7 @@ exports.getDashboard = asyncHandler(async (req, res, next) => {
 // @route   GET/api/v1/visitors
 // @access   Public
 exports.deleteStaff = asyncHandler(async (req, res, next) => {
-  await Employee.findByIdAndDelete();
+  await Employee.findByIdAndDelete(req.params.id);
   res.status(200).json({ success: true });
 });
 
@@ -104,6 +104,7 @@ exports.deleteStaff = asyncHandler(async (req, res, next) => {
 // @route   GET/api/v1/visitors
 // @access   Public
 exports.deleteFrontdesk = asyncHandler(async (req, res, next) => {
-  await Frontdesk.findByIdAndDelete();
+  await Frontdesk.findByIdAndDelete(req.params.id);
+
   res.status(200).json({ success: true });
 });

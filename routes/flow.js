@@ -14,7 +14,7 @@ router
   .route("/")
   .post(protect, advancedResults(ReturningVisitor), getDashboard);
 
-router.route("/frontdesk").delete(protect, deleteFrontdesk);
-router.route("/staff").delete(protect, deleteStaff);
+router.route("/frontdesk/:id").delete(deleteFrontdesk);
+router.route("/staff/:id").delete(deleteStaff);
 
 module.exports = router;
