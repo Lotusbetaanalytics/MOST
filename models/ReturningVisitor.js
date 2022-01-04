@@ -10,6 +10,10 @@ const ReturningVisitorSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please add laptop"],
   },
+  laptopCount: {
+    type: Number,
+    default: 0,
+  },
   lsn: {
     type: String,
   },

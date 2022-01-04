@@ -87,5 +87,23 @@ exports.getDashboard = asyncHandler(async (req, res, next) => {
     admin: admin.length || 0,
     book: book.length || 0,
     staff: staff.length || 0,
+    allStaff: staff,
+    allAdmin: admin,
   });
+});
+
+// @desc    Get all visitors
+// @route   GET/api/v1/visitors
+// @access   Public
+exports.deleteStaff = asyncHandler(async (req, res, next) => {
+  await Employee.findByIdAndDelete();
+  res.status(200).json({ success: true });
+});
+
+// @desc    Get all visitors
+// @route   GET/api/v1/visitors
+// @access   Public
+exports.deleteFrontdesk = asyncHandler(async (req, res, next) => {
+  await Frontdesk.findByIdAndDelete();
+  res.status(200).json({ success: true });
 });
