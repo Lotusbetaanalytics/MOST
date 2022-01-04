@@ -3,6 +3,9 @@ const asyncHandler = require("../middleware/async");
 const Visitor = require("../models/visitor");
 const ReturningVisitor = require("../models/ReturningVisitor");
 const visitor = require("../models/visitor");
+const Frontdesk = require("../models/Frontdesk");
+const PreBooked = require("../models/PreBooked");
+const Employee = require("../models/Employee");
 
 // @desc    Get all visitors
 // @route   GET/api/v1/visitors
@@ -19,6 +22,9 @@ exports.getVisitors = asyncHandler(async (req, res, next) => {
 // @access   Public
 exports.getDashboard = asyncHandler(async (req, res, next) => {
   const visitorsToday = await ReturningVisitor.find({ date: req.body.date });
+  const admin = await Frontdesk.find();
+  const staff = await Employee.find();
+  const book = await PreBooked.find();
   const pending = await ReturningVisitor.find({
     date: req.body.date,
     status: "Pending",
@@ -78,5 +84,8 @@ exports.getDashboard = asyncHandler(async (req, res, next) => {
     rejected,
     vin,
     out,
+    admin: admin.length || 0,
+    book: book.length || 0,
+    staff: staff.length || 0,
   });
 });
