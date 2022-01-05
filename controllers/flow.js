@@ -108,3 +108,41 @@ exports.deleteFrontdesk = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({ success: true });
 });
+
+// @desc    Get all visitors
+// @route   GET/api/v1/visitors
+// @access   Public
+exports.getStaff = asyncHandler(async (req, res, next) => {
+  const staff = await Employee.findById(req.params.id);
+  res.status(200).json({ success: true, data: staff });
+});
+
+// @desc    Get all visitors
+// @route   GET/api/v1/visitors
+// @access   Public
+exports.getAdmin = asyncHandler(async (req, res, next) => {
+  const staff = await Frontdesk.findById(req.params.id);
+  res.status(200).json({ success: true, data: staff });
+});
+
+// @desc    Get all visitors
+// @route   GET/api/v1/visitors
+// @access   Public
+exports.updateStaff = asyncHandler(async (req, res, next) => {
+  const staff = await Employee.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+  res.status(200).json({ success: true, data: staff });
+});
+
+// @desc    Get all visitors
+// @route   GET/api/v1/visitors
+// @access   Public
+exports.updateAdmin = asyncHandler(async (req, res, next) => {
+  const staff = await Frontdesk.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+  res.status(200).json({ success: true, data: staff });
+});
