@@ -30,6 +30,8 @@ const flow = require("./routes/flow");
 const guest = require("./routes/guest");
 const prebook = require("./routes/prebook");
 const employee = require("./routes/employee");
+const guestMost = require("./routes/guestMost");
+const returningMost = require("./routes/returningMost");
 
 const app = express();
 
@@ -84,6 +86,9 @@ app.use("/api/v1/prebook", prebook);
 app.use("/api/v1/frontdesk/employee", employee);
 app.use("/api/v1/employee", employee);
 app.use("/api/v1/guest", guest);
+// MOST Routes
+app.use("/api/v1/guestMost", guestMost);
+app.use("/api/v1/returningMost", returningMost);
 
 app.use(errorHandler);
 

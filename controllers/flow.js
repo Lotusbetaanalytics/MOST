@@ -75,7 +75,7 @@ exports.getDashboard = asyncHandler(async (req, res, next) => {
     checkedIn: vin.length,
     checkedOut: out.length,
     all: all.length,
-    pending: pending.length,
+    pending: awaiting.length,
     newGuest: pending,
     awaiting,
     today,

@@ -1,9 +1,13 @@
 const mongoose = require("mongoose");
 
 const VisitorSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: [true, "Please add title"],
+  },
   fullname: {
     type: String,
-    required: [true, "Please add name"],
+    required: [true, "Please add fullname"],
   },
   company: {
     type: String,
@@ -16,28 +20,29 @@ const VisitorSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    unique: true,
-  },
-  laptop: {
-    type: String,
-    required: [true, "Please add laptop"],
-  },
-  lsn: {
-    type: String,
   },
   host: {
-    type: String,
+    type: mongoose.Schema.ObjectId,
+    ref: "Employee",
     required: [true, "Please add host"],
   },
   purpose: {
     type: String,
     required: [true, "Please add purpose"],
   },
+  role: {
+    type: String,
+  },
+  group: {
+    type: String,
+  },
+  count: {
+    type: String,
+  },
   appointment: {
     type: String,
     required: [true, "Please add appointment"],
   },
-
   photo: {
     type: String,
     default: "no-photo.jpg",

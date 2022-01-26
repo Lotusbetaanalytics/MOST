@@ -5,10 +5,8 @@ const Visitor = require("../models/visitor");
 const Frontdesk = require("../models/Frontdesk");
 const Employee = require("../models/Employee");
 const sendEmail = require("../utils/sendEmail");
-const sgMail = require('@sendgrid/mail')
-sgMail.setApiKey(process.env.SENDGRID_API_KEY)
-
-
+const sgMail = require("@sendgrid/mail");
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
@@ -27,7 +25,7 @@ exports.getVisitorsInfo = asyncHandler(async (req, res, next) => {
     })
     .populate({
       path: "host",
-      select: "fullname",
+      select: "name",
     });
   res.status(200).json({ success: true, data: visitors });
 });
@@ -37,12 +35,9 @@ exports.getVisitorsInfo = asyncHandler(async (req, res, next) => {
 // @access   Private
 exports.sendToHost = asyncHandler(async (req, res, next) => {
   //Create reset url
- 
 
   const host = await Employee.findById(req.body.host);
-   const approve = `${req.protocol}://${req.get(
-    "host"
-  )}/staff/${host._id}`;
+  const approve = `${req.protocol}://${req.get("host")}/staff/${host._id}`;
 
   const html = `<table width="100%" border="0" align="center" cellpadding="0" cellspacing="0">
 <tbody>
@@ -119,24 +114,22 @@ exports.sendToHost = asyncHandler(async (req, res, next) => {
 </tbody>
 </table>`;
 
-// const msg = {
-//   to: host.email, // Change to your recipient
-//   from: 'vmanagement@lagosstate.gov.ng', // Change to your verified sender
-//   subject: "New Guest",
-//   html: html,
-// }
-// sgMail
-//   .send(msg)
-//   .then(() => {
-//     console.log('Email sent')
-//       res.status(200).json({ success: true, data: "Email Sent" });
-//   })
-//   .catch((error) => {
-//     console.error(error)
-//     return next(new ErrorResponse("Email could not be sent", 500));
-//   })
-
-
+  // const msg = {
+  //   to: host.email, // Change to your recipient
+  //   from: 'vmanagement@lagosstate.gov.ng', // Change to your verified sender
+  //   subject: "New Guest",
+  //   html: html,
+  // }
+  // sgMail
+  //   .send(msg)
+  //   .then(() => {
+  //     console.log('Email sent')
+  //       res.status(200).json({ success: true, data: "Email Sent" });
+  //   })
+  //   .catch((error) => {
+  //     console.error(error)
+  //     return next(new ErrorResponse("Email could not be sent", 500));
+  //   })
 
   // req.body.status = "Awaiting Host";
   req.body.status = "Pending";
@@ -150,7 +143,6 @@ exports.sendToHost = asyncHandler(async (req, res, next) => {
       new: true,
       runValidators: true,
     });
-
 
     client.messages
       .create({
@@ -177,19 +169,17 @@ exports.approveGuest = asyncHandler(async (req, res, next) => {
     new: true,
     runValidators: true,
   });
-const guest = await Frontdesk.find() 
+  const guest = await Frontdesk.find();
 
-      client.messages
-      .create({
-        body: `Hi Frontdesk!,  ${req.body.name} has been approved`,
-        messagingServiceSid: `${process.env.TWILIO_SID}`,
-        from: "+19472085695",
-        to: `+234${guest[0].mobile}`,
-      })
-      .then((message) => console.log(message.sid))
-      .done();
-
-
+  client.messages
+    .create({
+      body: `Hi Frontdesk!,  ${req.body.name} has been approved`,
+      messagingServiceSid: `${process.env.TWILIO_SID}`,
+      from: "+19472085695",
+      to: `+234${guest[0].mobile}`,
+    })
+    .then((message) => console.log(message.sid))
+    .done();
 
   res.status(200).json({ success: true, data: "Guest has been Approved" });
   // io.on("connection", (socket) => {
@@ -208,17 +198,17 @@ exports.rejectGuest = asyncHandler(async (req, res, next) => {
     new: true,
     runValidators: true,
   });
-  const guest = await Frontdesk.find() 
+  const guest = await Frontdesk.find();
 
-      client.messages
-      .create({
-        body: `Hi Frontdesk!,  ${req.body.name} has been rejected`,
-        messagingServiceSid: `${process.env.TWILIO_SID}`,
-        from: "+19472085695",
-        to: `+234${guest[0].mobile}`,
-      })
-      .then((message) => console.log(message.sid))
-      .done();
+  client.messages
+    .create({
+      body: `Hi Frontdesk!,  ${req.body.name} has been rejected`,
+      messagingServiceSid: `${process.env.TWILIO_SID}`,
+      from: "+19472085695",
+      to: `+234${guest[0].mobile}`,
+    })
+    .then((message) => console.log(message.sid))
+    .done();
   res.status(200).json({ success: true, data: "Guest has been Rejected" });
 });
 
@@ -241,13 +231,7 @@ exports.checkOutGuest = asyncHandler(async (req, res, next) => {
   req.body.status = "CheckedOut";
   req.body.timeOut = new Date().toLocaleString();
 
-  const find = await Visitor.findOne({
-    mobile: req.body.mobile,
-  })
-    .sort({ _id: -1 })
-    .limit(1);
-
-  const me = await ReturningVisitor.findOne({ user: find._id })
+  const me = await ReturningVisitor.findOne({ tag: req.body.tag })
     .sort({ _id: -1 })
     .limit(1);
 

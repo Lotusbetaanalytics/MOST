@@ -6,17 +6,6 @@ const ReturningVisitorSchema = new mongoose.Schema({
     ref: "Visitor",
     required: true,
   },
-  laptop: {
-    type: String,
-    required: [true, "Please add laptop"],
-  },
-  laptopCount: {
-    type: Number,
-    default: 0,
-  },
-  lsn: {
-    type: String,
-  },
   host: {
     type: mongoose.Schema.ObjectId,
     ref: "Employee",
@@ -30,8 +19,15 @@ const ReturningVisitorSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please add appointment"],
   },
-  plusOne: {
+  role: {
     type: String,
+  },
+  group: {
+    type: String,
+  },
+  count: {
+    type: String,
+    default: "1",
   },
   photo: {
     type: String,
@@ -64,6 +60,9 @@ const ReturningVisitorSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  tag: {
+    type: String,
   },
 });
 

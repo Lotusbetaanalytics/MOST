@@ -24,27 +24,38 @@ exports.getEmployee = asyncHandler(async (req, res, next) => {
   res.status(200).json(res.advancedResults);
 });
 
-
-
 // @desc    Login User
 // @route   POST/api/v1/auth/admin/login
 // @access   Public
 exports.staffLogin = asyncHandler(async (req, res, next) => {
-  const { id } = req.body;
+  const { mobile, password } = req.body;
+
+  console.log(req.body);
 
   //validate email & password
-  if (!id) {
-    return next(new ErrorResponse("Please Provide a token", 400));
+  if (!mobile || !password) {
+    return next(
+      new ErrorResponse("Please Provide an mobile and password", 400)
+    );
   }
   //check for user
-  const staff = await Employee.findById(id)
+  const staff =
+    (await Employee.findOne({ phone: mobile }).select("+password")) ||
+    (await Employee.findOne({ mobile: mobile }).select("+password"));
 
   if (!staff) {
     return next(new ErrorResponse("Invalid credentials", 401));
   }
+
+  //check if password match
+  const isMatch = await staff.matchPassword(password);
+
+  if (!isMatch) {
+    return next(new ErrorResponse("Invalid credentials", 401));
+  }
+
   sendTokenResponse(staff, 200, res);
 });
-
 
 //Get token from model, create cookie and send response
 const sendTokenResponse = (staff, statusCode, res) => {
@@ -67,71 +78,75 @@ const sendTokenResponse = (staff, statusCode, res) => {
   });
 };
 
-
 // @desc    Get current logged in user
 // @route   POST/api/v1/auth/me
 // @access   Private
 
 exports.getStaffProfile = asyncHandler(async (req, res, next) => {
   const employee = await Employee.findById(req.staff.id);
- 
+
   res.status(200).json({
     success: true,
     data: employee,
   });
 });
 
-
 // @desc    Get all visitors
 // @route   GET/api/v1/visitors
 // @access   Public
 exports.getLogs = asyncHandler(async (req, res, next) => {
-  const visitorsToday = await ReturningVisitor.find({ date: req.body.date, host:req.staff.id });
+  const visitorsToday = await ReturningVisitor.find({
+    date: req.body.date,
+    host: req.staff.id,
+  });
   const pending = await ReturningVisitor.find({
     date: req.body.date,
-    status: "Pending",host:req.staff.id
+    status: "Pending",
+    host: req.staff.id,
   }).populate({ path: "user", select: "fullname company email mobile" });
 
   const awaiting = await ReturningVisitor.find({
     date: req.body.date,
-    status: "Awaiting Host",host:req.staff.id
+    status: "Awaiting Host",
+    host: req.staff.id,
   }).populate({ path: "user", select: "fullname company email mobile" });
 
   const approved = await ReturningVisitor.find({
     date: req.body.date,
-    status: "Approved",host:req.staff.id
+    status: "Approved",
+    host: req.staff.id,
   }).populate({ path: "user", select: "fullname company email mobile" });
 
   const rejected = await ReturningVisitor.find({
     date: req.body.date,
-    status: "Rejected",host:req.staff.id
+    status: "Rejected",
+    host: req.staff.id,
   }).populate({ path: "user", select: "fullname company email mobile" });
 
-
-
-  const all = await ReturningVisitor.find({host:req.staff.id});
-  const allLogs = await ReturningVisitor.find({host:req.staff.id}).populate({
+  const all = await ReturningVisitor.find({ host: req.staff.id });
+  const allLogs = await ReturningVisitor.find({ host: req.staff.id }).populate({
     path: "user",
     select: "fullname company email mobile",
   });
   const today = await ReturningVisitor.find({
-    date: req.body.date,host:req.staff.id
+    date: req.body.date,
+    host: req.staff.id,
   }).populate({ path: "user", select: "fullname company email mobile" });
-  
-  const booked = await PreBooked.find({host:req.staff.id});
+
+  const booked = await PreBooked.find({ host: req.staff.id });
 
   res.status(200).json({
     success: true,
     vtoday: visitorsToday.length || 0,
     all: all.length || 0,
     pending: pending.length || 0,
-    newGuest: pending,
+    newGuest: awaiting,
     awaiting,
     today,
     allLogs,
     approved,
     rejected,
-   booked,
-   prebook:booked.length || 0
+    booked,
+    prebook: booked.length || 0,
   });
 });

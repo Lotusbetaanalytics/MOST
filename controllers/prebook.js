@@ -79,7 +79,7 @@ exports.prebook = asyncHandler(async (req, res, next) => {
                       <tr>
                           <td align="center"
                               style="font-family: 'Lato', sans-serif; font-size:14px; color:#757575; line-height:24px; font-weight: 300;">
-                           You have been prebooked by ${host.fullname} on ${req.body.date}. time: ${req.body.timeIn}
+                           You have been prebooked by ${host.name} on ${req.body.date}. time: ${req.body.timeIn}
                              Here's is your token 
                              <h1>${req.body.code}</h1>
                           </td>
@@ -170,7 +170,7 @@ exports.notifyHost = asyncHandler(async (req, res, next) => {
                         <tr>
                             <td align="center"
                                 style="font-family: 'Raleway', sans-serif; font-size:22px; font-weight: bold; color:#2a3a4b;">
-                                Dear ${host.fullname},
+                                Dear ${host.name},
                                 
                             </td>
                         </tr>
@@ -184,6 +184,9 @@ exports.notifyHost = asyncHandler(async (req, res, next) => {
                             <td align="center"
                                 style="font-family: 'Lato', sans-serif; font-size:14px; color:#757575; line-height:24px; font-weight: 300;">
                             Your Guest ${guest.fullname} has arrived
+                            <br />
+                           <br />
+                          <img src="${req.body.photo}" alt="${guest.fullname}" style="width:200px;height:200px;border-radius:50%" />
                             </td>
                         </tr>
     

@@ -8,12 +8,21 @@ const PreBookedSchema = new mongoose.Schema({
   mobile: {
     type: String,
   },
+  company: {
+    type: String,
+  },
+  purpose: {
+    type: String,
+  },
   email: {
     type: String,
   },
- host: {
+  host: {
     type: mongoose.Schema.ObjectId,
     required: [true, "Please add host"],
+  },
+  photo: {
+    type: String,
   },
   date: { type: String },
   timeIn: { type: String },
