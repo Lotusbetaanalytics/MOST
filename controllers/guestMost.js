@@ -96,6 +96,7 @@ exports.newVisitor = asyncHandler(async (req, res, next) => {
 </tbody>
 </table>`;
 
+  console.log(host.email);
   try {
     await sendEmail({
       email: host.email,
@@ -105,7 +106,7 @@ exports.newVisitor = asyncHandler(async (req, res, next) => {
 
     client.messages
       .create({
-        body: `Hi ${host.fullname}!,  ${user.fullname} from ${user.company}, is here to see you, Check your email for more information`,
+        body: `Hi ${host.fullname}!,  ${req.body.fullname} from ${req.body.company}, is here to see you, Check your email for more information`,
         messagingServiceSid: `${process.env.TWILIO_SID}`,
         from: "VMS",
         to: `+234${host.mobile}`,
@@ -114,7 +115,7 @@ exports.newVisitor = asyncHandler(async (req, res, next) => {
       .done();
     client.messages
       .create({
-        body: `Hi ${host.fullname}!,  ${user.fullname} from ${user.company}, is here to see you, Check your email for more information`,
+        body: `Hi ${host.fullname}!,  ${req.body.fullname} from ${req.body.company}, is here to see you, Check your email for more information`,
         messagingServiceSid: `${process.env.TWILIO_SID}`,
         from: "VMS",
         to: `+234${host.phone}`,

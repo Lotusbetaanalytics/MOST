@@ -16,7 +16,6 @@ const VisitorSchema = new mongoose.Schema({
   mobile: {
     type: String,
     maxlength: [20, "Phone Number cannot be more than 20 characters"],
-    unique: true,
   },
   email: {
     type: String,
