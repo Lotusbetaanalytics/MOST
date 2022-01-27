@@ -15,8 +15,7 @@ exports.prebook = asyncHandler(async (req, res, next) => {
     alphabets: false,
     digits: true,
   });
-  const host = await Employee.findOne({ email: req.body.host });
-  req.body.host = host._id;
+  const host = await Employee.findById(req.body.host);
   req.body.code = code;
   req.body.token = code;
 
