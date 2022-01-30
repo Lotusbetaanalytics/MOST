@@ -94,3 +94,112 @@ exports.newVisitor = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse("Email could not be sent", 500));
   }
 });
+
+// @desc    Approve
+// @route   PUT/api/v1/visitors/approve/:id
+// @access   Public
+exports.approveVisitor = asyncHandler(async (req, res, next) => {
+  const fields = {
+    status: "Approved",
+  };
+  const visitors = await ReturningVisitor.findByIdAndUpdate(
+    req.params.id,
+    fields,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+  const serviceDesk = await Frontdesk.findById(visitors.staff);
+  if (!visitors) {
+    return next(new ErrorResponse("An Error Occured, Try Again", 400));
+  }
+  client.messages
+    .create({
+      body: `Hi ${serviceDesk.firstname}!,  ${req.body.name} has been approved`,
+      messagingServiceSid: `${process.env.TWILIO_SID}`,
+      from: "VMS",
+      to: `+234${serviceDesk.mobile}`,
+    })
+    .then((message) => console.log(message.sid))
+    .done();
+  res.status(200).json({ success: true });
+});
+
+// @desc    Reject
+// @route   PUT/api/v1/visitors/reject/:id
+// @access   Public
+exports.rejectVisitor = asyncHandler(async (req, res, next) => {
+  let date = new Date().toLocaleString();
+  const fields = {
+    status: "Rejected",
+    timeOut: date,
+  };
+  const visitors = await ReturningVisitor.findByIdAndUpdate(
+    req.params.id,
+    fields,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+  const serviceDesk = await Frontdesk.findById(visitors.staff);
+  if (!visitors) {
+    return next(new ErrorResponse("An Error Occured, Try Again", 400));
+  }
+  client.messages
+    .create({
+      body: `Hi ${serviceDesk.firstname}!,  ${req.body.name} has been rejected`,
+      messagingServiceSid: `${process.env.TWILIO_SID}`,
+      from: "VMS",
+      to: `+234${serviceDesk.mobile}`,
+    })
+    .then((message) => console.log(message.sid))
+    .done();
+  res.status(200).json({ success: true });
+});
+
+// @desc    Checkin
+// @route   PUT/api/v1/visitors/checkin/:id
+// @access   Private
+exports.checkinVisitor = asyncHandler(async (req, res, next) => {
+  const fields = {
+    tag: req.body.tag,
+    status: "CheckedIn",
+  };
+  const visitors = await ReturningVisitor.findByIdAndUpdate(
+    req.params.id,
+    fields,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+  if (!visitors) {
+    return next(new ErrorResponse("An Error Occured, Try Again", 400));
+  }
+  res.status(200).json({ success: true });
+});
+
+// @desc    Checkin
+// @route   PUT/api/v1/visitors/checkin/:id
+// @access   Private
+exports.checkoutVisitor = asyncHandler(async (req, res, next) => {
+  let date = new Date().toLocaleString();
+  const fields = {
+    timeOut: date,
+    status: "CheckedOut",
+  };
+  const visitors = await ReturningVisitor.findByIdAndUpdate(
+    req.params.id,
+    fields,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+  if (!visitors) {
+    return next(new ErrorResponse("An Error Occured, Try Again", 400));
+  }
+  res.status(200).json({ success: true });
+});
