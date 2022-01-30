@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
 const EmployeeSchema = new mongoose.Schema({
   name: {
@@ -10,15 +11,19 @@ const EmployeeSchema = new mongoose.Schema({
   mobile: {
     type: String,
     maxlength: [11, "Phone Number cannot be more than 20 characters"],
-    unique: true,
   },
   phone: {
     type: String,
-    maxlength: [11, "Phone Number cannot be more than 20 characters"],
+    maxlength: [14, "Phone Number cannot be more than 20 characters"],
   },
   email: {
     type: String,
-    unique: true,
+  },
+  role: {
+    type: String,
+    required: true,
+    enum: ["Admin", "SuperAdmin"],
+    default: "Admin",
   },
   password: {
     type: String,
@@ -51,6 +56,20 @@ EmployeeSchema.methods.getSignedJwtToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE,
   });
+};
+//Generate and hash password token
+EmployeeSchema.methods.getResetPasswordToken = function () {
+  //Generate token
+  const resetToken = crypto.randomBytes(20).toString("hex");
+  //Hash token and set to resetPasswordToken field
+  this.resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  //set expire
+  this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+  return resetToken;
 };
 
 module.exports = mongoose.model("Employee", EmployeeSchema);

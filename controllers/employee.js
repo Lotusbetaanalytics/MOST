@@ -1,47 +1,41 @@
 const ErrorResponse = require("../utils/errorResponse");
 const asyncHandler = require("../middleware/async");
 const Employee = require("../models/Employee");
-const ReturningVisitor = require("../models/ReturningVisitor");
-const visitor = require("../models/visitor");
-const PreBooked = require("../models/PreBooked");
+const sendEmail = require("../utils/sendEmail");
+const crypto = require("crypto");
 
-// @desc    Create Admin/SuperAdmin
-// @route   POST/api/v1/auth/admin/register
+// @desc    Create Employee
+// @route   POST/api/v1/employee/
 // @access   Private/Admin
 exports.createEmployee = asyncHandler(async (req, res, next) => {
-  const employee = await Employee.create(req.body);
-
+  const staff = await Employee.create(req.body);
   res.status(201).json({
     success: true,
-    data: employee,
+    data: staff,
   });
 });
 
-// @desc    Get Admin/SuperAdmin
-// @route   POST/api/v1/auth/admin/register
+// @desc    Get ALl Employee
+// @route   POST/api/v1/employee
 // @access   Private/Admin
-exports.getEmployee = asyncHandler(async (req, res, next) => {
+exports.getEmployees = asyncHandler(async (req, res, next) => {
   res.status(200).json(res.advancedResults);
 });
 
 // @desc    Login User
-// @route   POST/api/v1/auth/admin/login
+// @route   POST/api/v1/employee/login
 // @access   Public
-exports.staffLogin = asyncHandler(async (req, res, next) => {
-  const { mobile, password } = req.body;
-
-  console.log(req.body);
+exports.login = asyncHandler(async (req, res, next) => {
+  const { name, password } = req.body;
 
   //validate email & password
-  if (!mobile || !password) {
+  if (!name || !password) {
     return next(
-      new ErrorResponse("Please Provide an mobile and password", 400)
+      new ErrorResponse("Please Provide department and password", 400)
     );
   }
   //check for user
-  const staff =
-    (await Employee.findOne({ phone: mobile }).select("+password")) ||
-    (await Employee.findOne({ mobile: mobile }).select("+password"));
+  const staff = await Employee.findOne({ name: name }).select("+password");
 
   if (!staff) {
     return next(new ErrorResponse("Invalid credentials", 401));
@@ -55,6 +49,101 @@ exports.staffLogin = asyncHandler(async (req, res, next) => {
   }
 
   sendTokenResponse(staff, 200, res);
+});
+
+// @desc    Log user out / clear cookie
+// @route  GET /api/v1/auth/logout
+// @access   Private
+
+exports.logout = asyncHandler(async (req, res, next) => {
+  res.cookie("token", "none", {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+  res.status(200).json({
+    success: true,
+    data: {},
+  });
+});
+
+// @desc    Get current logged in user
+// @route   POST/api/v1/auth/me
+// @access   Private
+
+exports.getMe = asyncHandler(async (req, res, next) => {
+  const staff = await Employee.findById(req.staff.id);
+  res.status(200).json({
+    success: true,
+    data: staff,
+  });
+});
+
+// @desc    Reset Password
+// @route   PUT/api/v1/employee/:resettoken
+// @access   Public
+
+exports.resetPassword = asyncHandler(async (req, res, next) => {
+  //get hashed token
+  const resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(req.body.id)
+    .digest("hex");
+  const staff = await Employee.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+  if (!staff) {
+    return next(new ErrorResponse("Invalid Token", 400));
+  }
+  // set new password
+  staff.password = req.body.password;
+  staff.resetPasswordToken = undefined;
+  staff.resetPasswordTokenExpire = undefined;
+  await staff.save();
+
+  sendTokenResponse(staff, 200, res);
+});
+
+// @desc    Forgot Password
+// @route   POST/api/v1/employee/forgotpassword
+// @access   Public
+
+exports.forgotPassword = asyncHandler(async (req, res, next) => {
+  const user = await Employee.findOne({ email: req.body.email });
+  if (!user) {
+    return next(new ErrorResponse("User not found", 404));
+  }
+  //Get reset token
+  const resetToken = user.getResetPasswordToken();
+  await user.save({ validateBeforeSave: false });
+
+  //Create reset url
+  const resetUrl = `${req.protocol}://${req.get(
+    "host"
+  )}/resetPassword/${resetToken}`;
+
+  const salutation = `Hello There!`;
+  const content = ` You are receiving this email because you (or someone else) has requested
+    the reset of a password, Click on the link below to reset your password 
+    <br />
+    <br />
+    <a href="${resetUrl}" style="padding:1rem;color:white;background:green;border-radius:20px;">Click Here</a>`;
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: "Password reset token",
+      salutation,
+      content,
+    });
+    res.status(200).json({ success: true, data: "Email Sent" });
+  } catch (err) {
+    console.log(err);
+    user.getResetPasswordToken = undefined;
+    user.resetPasswordTokenExpire = undefined;
+    await user.save({ validateBeforeSave: false });
+    return next(new ErrorResponse("Email could not be sent", 500));
+  }
 });
 
 //Get token from model, create cookie and send response
@@ -77,76 +166,3 @@ const sendTokenResponse = (staff, statusCode, res) => {
     token,
   });
 };
-
-// @desc    Get current logged in user
-// @route   POST/api/v1/auth/me
-// @access   Private
-
-exports.getStaffProfile = asyncHandler(async (req, res, next) => {
-  const employee = await Employee.findById(req.staff.id);
-
-  res.status(200).json({
-    success: true,
-    data: employee,
-  });
-});
-
-// @desc    Get all visitors
-// @route   GET/api/v1/visitors
-// @access   Public
-exports.getLogs = asyncHandler(async (req, res, next) => {
-  const visitorsToday = await ReturningVisitor.find({
-    date: req.body.date,
-    host: req.staff.id,
-  });
-  const pending = await ReturningVisitor.find({
-    date: req.body.date,
-    status: "Pending",
-    host: req.staff.id,
-  }).populate({ path: "user", select: "fullname company email mobile" });
-
-  const awaiting = await ReturningVisitor.find({
-    date: req.body.date,
-    status: "Awaiting Host",
-    host: req.staff.id,
-  }).populate({ path: "user", select: "fullname company email mobile" });
-
-  const approved = await ReturningVisitor.find({
-    date: req.body.date,
-    status: "Approved",
-    host: req.staff.id,
-  }).populate({ path: "user", select: "fullname company email mobile" });
-
-  const rejected = await ReturningVisitor.find({
-    date: req.body.date,
-    status: "Rejected",
-    host: req.staff.id,
-  }).populate({ path: "user", select: "fullname company email mobile" });
-
-  const all = await ReturningVisitor.find({ host: req.staff.id });
-  const allLogs = await ReturningVisitor.find({ host: req.staff.id }).populate({
-    path: "user",
-    select: "fullname company email mobile",
-  });
-  const today = await ReturningVisitor.find({
-    date: req.body.date,
-    host: req.staff.id,
-  }).populate({ path: "user", select: "fullname company email mobile" });
-
-  const booked = await PreBooked.find({ host: req.staff.id });
-
-  res.status(200).json({
-    success: true,
-    vtoday: visitorsToday.length || 0,
-    all: all.length || 0,
-    pending: pending.length || 0,
-    newGuest: awaiting,
-    awaiting,
-    today,
-    allLogs,
-    approved,
-    rejected,
-    booked,
-    prebook: booked.length || 0,
-  });
-});

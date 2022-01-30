@@ -4,27 +4,26 @@ const Frontdesk = require("../models/Frontdesk");
 const sendEmail = require("../utils/sendEmail");
 const crypto = require("crypto");
 
-// @desc    Create Admin/SuperAdmin
-// @route   POST/api/v1/auth/admin/register
+// @desc    Create Frontdesk
+// @route   POST/api/v1/frontdesk/
 // @access   Private/Admin
 exports.createFrontdesk = asyncHandler(async (req, res, next) => {
   const frontdesk = await Frontdesk.create(req.body);
-
   res.status(201).json({
     success: true,
     data: frontdesk,
   });
 });
 
-// @desc    Get Admin/SuperAdmin
-// @route   POST/api/v1/auth/admin/register
+// @desc    Get ALl Frontdesk
+// @route   POST/api/v1/frontdesk
 // @access   Private/Admin
 exports.getFrontdesk = asyncHandler(async (req, res, next) => {
   res.status(200).json(res.advancedResults);
 });
 
 // @desc    Login User
-// @route   POST/api/v1/auth/admin/login
+// @route   POST/api/v1/frontdesk/login
 // @access   Public
 exports.login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
@@ -80,7 +79,7 @@ exports.getMe = asyncHandler(async (req, res, next) => {
 });
 
 // @desc    Reset Password
-// @route   PUT/api/v1/auth/resetpassword/:resettoken
+// @route   PUT/api/v1/frontdesk/:resettoken
 // @access   Public
 
 exports.resetPassword = asyncHandler(async (req, res, next) => {
@@ -106,12 +105,11 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
 });
 
 // @desc    Forgot Password
-// @route   POST/api/v1/auth/forgotpassword
+// @route   POST/api/v1/frontdesk/forgotpassword
 // @access   Public
 
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
   const user = await Frontdesk.findOne({ email: req.body.email });
-
   if (!user) {
     return next(new ErrorResponse("User not found", 404));
   }
@@ -124,90 +122,19 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
     "host"
   )}/resetPassword/${resetToken}`;
 
-  const html = `<table width="100%" border="0" align="center" cellpadding="0" cellspacing="0">
-<tbody>
-    <tr>
-        <td align="center">
-            <table class="col-600" width="600" border="0" align="center" cellpadding="0" cellspacing="0">
-                <tbody>
-                    <tr>
-                        <td align="center" valign="top" bgcolor="#640ad2"
-                            style="background:linear-gradient(0deg, rgba(100, 10, 210, 0.8), rgba(100, 10, 210, 0.8)),url(https://lbanstaffportal.herokuapp.com/static/media/tech.45a93050.jpg);background-size:cover; background-position:top;height:230">
-                            <table class="col-600" width="600" height="200" border="0" align="center"
-                                cellpadding="0" cellspacing="0">
-                                <tbody>
-                                    <tr>
-                                        <td align="center" style="line-height: 0px;">
-                                            <img style="display:block; line-height:0px; font-size:0px; border:0px;"
-                                                src="https://lbanstaffportal.herokuapp.com/static/media/logo.49e95c77.png"
-                                                width="70" height="70" alt="logo">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td align="center"
-                                            style="font-family: 'Raleway', sans-serif; font-size:37px; color:#ffffff;font-weight: bold;">
-                                            Lotus Beta Analytics
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td align="center"
-                                            style="font-family: 'Lato', sans-serif; font-size:15px; color:#ffffff;font-weight: 300;">
-                                            Our goal as an organization is to provide our customers with the best
-                                            value
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </td>
-    </tr>
-    <tr>
-        <td align="center">
-            <table class="col-600" width="600" border="0" align="center" cellpadding="0" cellspacing="0"
-                style="margin-left:20px; margin-right:20px; border-left: 1px solid #dbd9d9; border-right: 1px solid #dbd9d9;">
-                <tbody>
-                    <tr>
-                        <td height="35"></td>
-                    </tr>
-
-                    <tr>
-                        <td align="center"
-                            style="font-family: 'Raleway', sans-serif; font-size:22px; font-weight: bold; color:#2a3a4b;">
-                           Hello There!
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td height="10"></td>
-                    </tr>
-
-
-                    <tr>
-                        <td align="center"
-                            style="font-family: 'Lato', sans-serif; font-size:14px; color:#757575; line-height:24px; font-weight: 300;">
-                            You are receiving this email because you (or someone else) has requested
-                            the reset of a password, Click on the link below to reset your password 
-                            <br />
-                            <br />
-                            <a href="${resetUrl}" style="padding:1rem;color:white;background:green;border-radius:20px;">Click Here</a>
-                        </td>
-                    </tr>
-
-                </tbody>
-            </table>
-        </td>
-    </tr>
-</tbody>
-</table>`;
+  const salutation = `Hello There!`;
+  const content = ` You are receiving this email because you (or someone else) has requested
+  the reset of a password, Click on the link below to reset your password 
+  <br />
+  <br />
+  <a href="${resetUrl}" style="padding:1rem;color:white;background:green;border-radius:20px;">Click Here</a>`;
 
   try {
     await sendEmail({
       email: user.email,
       subject: "Password reset token",
-      html,
+      salutation,
+      content,
     });
     res.status(200).json({ success: true, data: "Email Sent" });
   } catch (err) {

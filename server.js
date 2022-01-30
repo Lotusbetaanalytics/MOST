@@ -23,15 +23,13 @@ dotenv.config({ path: "./config/config.env" });
 connectDB();
 
 // Routes Files
-const visitors = require("./routes/visitor");
-const returning = require("./routes/returningVisitor");
+
 const frontdesk = require("./routes/frontdesk");
-const flow = require("./routes/flow");
-const guest = require("./routes/guest");
-const prebook = require("./routes/prebook");
 const employee = require("./routes/employee");
-const guestMost = require("./routes/guestMost");
-const returningMost = require("./routes/returningMost");
+const newGuest = require("./routes/newGuest");
+const oldGuest = require("./routes/oldGuest");
+const prebook = require("./routes/prebook");
+const log = require("./routes/logs");
 
 const app = express();
 
@@ -76,19 +74,12 @@ app.use(hpp());
 //Mount Routers
 
 //Mount Routers
-app.use("/api/v1/visitors", visitors);
-app.use("/api/v1/returning", returning);
 app.use("/api/v1/frontdesk", frontdesk);
-app.use("/api/v1/frontdesk/flow", flow);
-app.use("/api/v1/frontdesk/guest", guest);
-app.use("/api/v1/frontdesk/prebook", prebook);
+app.use("/api/v1/staff", employee);
+app.use("/api/v1/guest", newGuest);
+app.use("/api/v1/returning", oldGuest);
 app.use("/api/v1/prebook", prebook);
-app.use("/api/v1/frontdesk/employee", employee);
-app.use("/api/v1/employee", employee);
-app.use("/api/v1/guest", guest);
-// MOST Routes
-app.use("/api/v1/guestMost", guestMost);
-app.use("/api/v1/returningMost", returningMost);
+app.use("/api/v1/log", log);
 
 app.use(errorHandler);
 

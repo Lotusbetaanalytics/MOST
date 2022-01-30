@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
 const FrontdeskSchema = new mongoose.Schema({
   firstname: {
@@ -22,8 +23,8 @@ const FrontdeskSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["Frontdesk", "Staff"],
-    default: "Frontdesk",
+    enum: ["Admin", "SuperAdmin"],
+    default: "Admin",
   },
   password: {
     type: String,
@@ -56,6 +57,20 @@ FrontdeskSchema.methods.getSignedJwtToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE,
   });
+};
+//Generate and hash password token
+FrontdeskSchema.methods.getResetPasswordToken = function () {
+  //Generate token
+  const resetToken = crypto.randomBytes(20).toString("hex");
+  //Hash token and set to resetPasswordToken field
+  this.resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  //set expire
+  this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+  return resetToken;
 };
 
 module.exports = mongoose.model("Frontdesk", FrontdeskSchema);

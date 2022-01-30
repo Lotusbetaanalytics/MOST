@@ -64,6 +64,10 @@ const ReturningVisitorSchema = new mongoose.Schema({
   tag: {
     type: String,
   },
+  staff: {
+    type: mongoose.Schema.ObjectId,
+    ref: "Frontdesk",
+  },
 });
 
 module.exports = mongoose.model("ReturningVisitor", ReturningVisitorSchema);
