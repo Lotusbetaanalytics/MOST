@@ -6,6 +6,8 @@ const {
   getFrontdesk,
   forgotPassword,
   resetPassword,
+  updateFrontdesk,
+  deleteFrontdesk,
 } = require("../controllers/frontdesk");
 const Frontdesk = require("../models/Frontdesk");
 const { protect, authorize } = require("../middleware/auth");
@@ -26,5 +28,9 @@ router.route("/login").post(login);
 router.route("/me").get(protect, getMe);
 router.route("/forgotPassword").post(forgotPassword);
 router.route("/resetPassword").post(resetPassword);
+router
+  .route("/:id")
+  .put(protect, authorize("SuperAdmin"), updateFrontdesk)
+  .delete(protect, authorize("SuperAdmin"), deleteFrontdesk);
 
 module.exports = router;

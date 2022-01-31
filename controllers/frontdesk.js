@@ -166,3 +166,32 @@ const sendTokenResponse = (frontdesk, statusCode, res) => {
     token,
   });
 };
+
+// @desc    Delete Frontdesk
+// @route   POST/api/v1/frontdesk/
+// @access   Private/Admin
+exports.deleteFrontdesk = asyncHandler(async (req, res, next) => {
+  const staff = await Frontdesk.findByIdAndDelete(req.params.id);
+  if (!staff) {
+    return next(new ErrorResponse("An Error Occured, Try Again", 400));
+  }
+  res.status(200).json({
+    success: true,
+  });
+});
+
+// @desc    Update Frontdesk
+// @route   POST/api/v1/frontdesk/
+// @access   Private/Admin
+exports.updateFrontdesk = asyncHandler(async (req, res, next) => {
+  const staff = await Frontdesk.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+  if (!staff) {
+    return next(new ErrorResponse("An Error Occured, Try Again", 400));
+  }
+  res.status(200).json({
+    success: true,
+  });
+});

@@ -18,8 +18,8 @@ exports.getLogs = asyncHandler(async (req, res, next) => {
       path: "user",
       select: "title fullname email mobile company",
     })
-    .populate({ path: "host", select: "name" })
-    .populate({ path: "staff", select: "firstname lastname" });
+    .populate({ path: "host", select: "name" });
+  // .populate({ path: "staff", select: "firstname lastname" });
   const prebooked = await PreBooked.find().populate({
     path: "host",
     select: "name",
@@ -37,21 +37,20 @@ exports.getLogs = asyncHandler(async (req, res, next) => {
 // @route   GET/api/v1/log
 // @access   Private/Admin
 exports.getStaffLogs = asyncHandler(async (req, res, next) => {
-  const unique = await Visitor.find({ host: req.staff.id });
-  console.log(req.staff.id);
-  const all = await ReturningVisitor.find({ host: req.staff.id })
+  const staffUnique = await Visitor.find({ host: req.staff.id });
+  const staffAll = await ReturningVisitor.find({ host: req.staff.id })
     .populate({
       path: "user",
       select: "title fullname email mobile company",
     })
     .populate({ path: "host", select: "name" });
-  const prebooked = await PreBooked.find({ host: req.staff.id }).populate({
+  const staffPrebooked = await PreBooked.find({ host: req.staff.id }).populate({
     path: "host",
     select: "name",
   });
   res.status(200).json({
-    unique,
-    all,
-    prebooked,
+    staffUnique,
+    staffAll,
+    staffPrebooked,
   });
 });

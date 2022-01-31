@@ -166,3 +166,32 @@ const sendTokenResponse = (staff, statusCode, res) => {
     token,
   });
 };
+
+// @desc    Delete Employee
+// @route   POST/api/v1/employee/
+// @access   Private/Admin
+exports.deleteEmployee = asyncHandler(async (req, res, next) => {
+  const staff = await Employee.findByIdAndDelete(req.params.id);
+  if (!staff) {
+    return next(new ErrorResponse("An Error Occured, Try Again", 400));
+  }
+  res.status(200).json({
+    success: true,
+  });
+});
+
+// @desc    Update Employee
+// @route   POST/api/v1/employee/
+// @access   Private/Admin
+exports.updateEmployee = asyncHandler(async (req, res, next) => {
+  const staff = await Employee.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+  if (!staff) {
+    return next(new ErrorResponse("An Error Occured, Try Again", 400));
+  }
+  res.status(200).json({
+    success: true,
+  });
+});
