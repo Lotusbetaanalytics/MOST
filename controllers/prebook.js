@@ -137,3 +137,35 @@ exports.getMyPrebooks = asyncHandler(async (req, res, next) => {
   }
   res.status(200).json({ success: true, data: book });
 });
+
+// @desc    PrebookGuest
+// @route   POST/api/v1/prebook
+// @access   Private/Admin
+exports.notifyHost = asyncHandler(async (req, res, next) => {
+  const book = await PreBooked.findById(req.body.id);
+  const host = await Employee.findById(book.host);
+  const salutation = `Dear ${host.name},`;
+  const content = ` Your prebooked guest ${book.fullname} has arrived`;
+
+  try {
+    await sendEmail({
+      email: host.email,
+      subject: "Prebook Guest",
+      salutation,
+      content,
+    });
+    client.messages
+      .create({
+        body: `Dear ${host.name}, Your prebooked guest ${book.fullname} has arrived`,
+        messagingServiceSid: `${process.env.TWILIO_SID}`,
+        from: "VMS",
+        to: `+234${host.mobile}`,
+      })
+      .then((message) => console.log(message.sid))
+      .done();
+    res.status(201).json({ success: true });
+  } catch (err) {
+    console.log(err);
+    return next(new ErrorResponse("Email could not be sent", 500));
+  }
+});

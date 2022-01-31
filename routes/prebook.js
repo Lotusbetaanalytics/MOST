@@ -5,6 +5,7 @@ const {
   prebook,
   prebookMyGuest,
   getMyPrebooks,
+  notifyHost,
 } = require("../controllers/prebook");
 const { protect, protects } = require("../middleware/auth");
 
@@ -16,5 +17,6 @@ router
   .route("/staff")
   .post(protects, prebookMyGuest)
   .get(protects, getMyPrebooks);
+router.route("/notify").post(protect, notifyHost);
 
 module.exports = router;

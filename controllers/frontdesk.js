@@ -171,6 +171,9 @@ const sendTokenResponse = (frontdesk, statusCode, res) => {
 // @route   POST/api/v1/frontdesk/
 // @access   Private/Admin
 exports.deleteFrontdesk = asyncHandler(async (req, res, next) => {
+  if (req.params.id === req.frontdesk.id) {
+    return next(new ErrorResponse("Account cannot be deleted", 400));
+  }
   const staff = await Frontdesk.findByIdAndDelete(req.params.id);
   if (!staff) {
     return next(new ErrorResponse("An Error Occured, Try Again", 400));
