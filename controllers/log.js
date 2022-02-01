@@ -18,8 +18,8 @@ exports.getLogs = asyncHandler(async (req, res, next) => {
       path: "user",
       select: "title fullname email mobile company",
     })
-    .populate({ path: "host", select: "name" });
-  // .populate({ path: "staff", select: "firstname lastname" });
+    .populate({ path: "host", select: "name" })
+    .populate({ path: "staff", select: "firstname lastname" });
   const prebooked = await PreBooked.find().populate({
     path: "host",
     select: "name",
