@@ -17,9 +17,11 @@ exports.verifyToken = asyncHandler(async (req, res, next) => {
     path: "host",
     select: "name",
   });
-  console.log(book);
   if (!book) {
     return next(new ErrorResponse("Invalid Token", 400));
+  }
+  if (book.active === false) {
+    return next(new ErrorResponse("Token has been used", 400));
   }
   res.status(200).json({ success: true, data: book });
 });
@@ -41,7 +43,8 @@ exports.prebook = asyncHandler(async (req, res, next) => {
   const content = ` You have been prebooked by ${host.name} on ${req.body.date}.
   Here's is your token 
   <h1>${req.body.token}</h1>`;
-
+  const book = await PreBooked.create(req.body);
+  res.status(201).json({ success: true, data: book });
   try {
     await sendEmail({
       email: req.body.email ? req.body.email : host.email,
@@ -146,7 +149,9 @@ exports.notifyHost = asyncHandler(async (req, res, next) => {
   const host = await Employee.findById(book.host);
   const salutation = `Dear ${host.name},`;
   const content = ` Your prebooked guest ${book.fullname} has arrived`;
-
+  const fields = {
+    active: false,
+  };
   try {
     await sendEmail({
       email: host.email,
@@ -163,6 +168,10 @@ exports.notifyHost = asyncHandler(async (req, res, next) => {
       })
       .then((message) => console.log(message.sid))
       .done();
+    await PreBooked.findByIdAndUpdate(req.body.id, fields, {
+      new: true,
+      runValidators: true,
+    });
     res.status(201).json({ success: true });
   } catch (err) {
     console.log(err);
@@ -187,14 +196,45 @@ exports.deletePrebook = asyncHandler(async (req, res, next) => {
 // @route   POST/api/v1/prebook/
 // @access   Private/Admin
 exports.updatePrebook = asyncHandler(async (req, res, next) => {
-  const staff = await PreBooked.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
+  const code = otpGenerator.generate(6, {
+    upperCase: false,
+    specialChars: false,
+    alphabets: false,
+    digits: true,
   });
-  if (!staff) {
-    return next(new ErrorResponse("An Error Occured, Try Again", 400));
+  const host = await Employee.findById(req.body.host);
+  req.body.token = code;
+  const salutation = `Dear ${req.body.fullname},`;
+  const content = ` You have been prebooked by ${host.name} on ${req.body.date}.
+  Here's is your token 
+  <h1>${req.body.token}</h1>`;
+
+  try {
+    await sendEmail({
+      email: req.body.email ? req.body.email : host.email,
+      subject: "Prebook Guest",
+      salutation,
+      content,
+      cc: host.email,
+    });
+    client.messages
+      .create({
+        body: `Dear ${req.body.fullname}, You have been prebooked by ${host.name} on ${req.body.date}. Your Access Token is: ${req.body.token}`,
+        messagingServiceSid: `${process.env.TWILIO_SID}`,
+        from: "VMS",
+        to: `+234${req.body.mobile}`,
+      })
+      .then((message) => console.log(message.sid))
+      .done();
+    await PreBooked.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    res.status(200).json({
+      success: true,
+    });
+  } catch (err) {
+    console.log(err);
+    return next(new ErrorResponse("Email could not be sent", 500));
   }
-  res.status(200).json({
-    success: true,
-  });
 });
