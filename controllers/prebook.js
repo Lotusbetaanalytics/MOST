@@ -169,3 +169,32 @@ exports.notifyHost = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse("Email could not be sent", 500));
   }
 });
+
+// @desc    Delete Prebook
+// @route   POST/api/v1/prebook/
+// @access   Private/Admin
+exports.deletePrebook = asyncHandler(async (req, res, next) => {
+  const staff = await PreBooked.findByIdAndDelete(req.params.id);
+  if (!staff) {
+    return next(new ErrorResponse("An Error Occured, Try Again", 400));
+  }
+  res.status(200).json({
+    success: true,
+  });
+});
+
+// @desc    Update Prebook
+// @route   POST/api/v1/prebook/
+// @access   Private/Admin
+exports.updatePrebook = asyncHandler(async (req, res, next) => {
+  const staff = await PreBooked.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+  if (!staff) {
+    return next(new ErrorResponse("An Error Occured, Try Again", 400));
+  }
+  res.status(200).json({
+    success: true,
+  });
+});
