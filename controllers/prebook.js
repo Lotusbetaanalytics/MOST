@@ -96,6 +96,7 @@ exports.prebookMyGuest = asyncHandler(async (req, res, next) => {
   });
   const host = await Employee.findById(req.staff.id);
   req.body.token = code;
+  req.body.host = req.staff.id;
 
   const salutation = `Dear ${req.body.fullname},`;
   const content = ` You have been prebooked by ${host.name} on ${req.body.date}.
