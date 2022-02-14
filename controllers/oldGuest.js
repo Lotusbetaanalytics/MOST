@@ -116,7 +116,7 @@ exports.approveVisitor = asyncHandler(async (req, res, next) => {
   }
   client.messages
     .create({
-      body: `Hi ${serviceDesk.firstname}!,  ${req.body.name} has been approved`,
+      body: `Hi ${serviceDesk.firstname}!,  ${req.body.name} has been approved by ${req.staff.name}`,
       messagingServiceSid: `${process.env.TWILIO_SID}`,
       from: "VMS",
       to: `+234${serviceDesk.mobile}`,
@@ -149,7 +149,7 @@ exports.rejectVisitor = asyncHandler(async (req, res, next) => {
   }
   client.messages
     .create({
-      body: `Hi ${serviceDesk.firstname}!,  ${req.body.name} has been rejected`,
+      body: `Hi ${serviceDesk.firstname}!,  ${req.body.name} has been rejected by ${req.staff.name}`,
       messagingServiceSid: `${process.env.TWILIO_SID}`,
       from: "VMS",
       to: `+234${serviceDesk.mobile}`,

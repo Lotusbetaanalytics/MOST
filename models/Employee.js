@@ -19,6 +19,7 @@ const EmployeeSchema = new mongoose.Schema({
   email: {
     type: String,
   },
+  VoIP: { type: String },
   role: {
     type: String,
     required: true,
