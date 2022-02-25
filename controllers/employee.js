@@ -109,7 +109,7 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
 // @access   Public
 
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
-  const user = await Employee.findOne({ email: req.body.email });
+  const user = await Employee.findOne({ name: req.body.name });
   if (!user) {
     return next(new ErrorResponse("User not found", 404));
   }
