@@ -24,6 +24,7 @@ exports.getLogs = asyncHandler(async (req, res, next) => {
     path: "host",
     select: "name",
   });
+
   res.status(200).json({
     department,
     staff,

@@ -12,8 +12,9 @@ const hpp = require("hpp");
 const cors = require("cors");
 const errorHandler = require("./middleware/error");
 const connectDB = require("./config/db");
-const socketIO = require("socket.io");
 const http = require("http");
+
+const socketUtils = require("./utils/socketUtils");
 
 //load env vars
 dotenv.config({ path: "./config/config.env" });
@@ -48,7 +49,21 @@ if (process.env.NODE_ENV === "development") {
 
 const i = http.createServer(app);
 
-const io = socketIO(i);
+const io = socketUtils.sio(i);
+socketUtils.connection(io);
+
+const socketIOMiddleware = (req, res, next) => {
+  req.io = io;
+
+  next();
+};
+// app.use(socketIOMiddleware());
+
+// app.use("/api/v1/hello", socketIOMiddleware, (req, res) => {
+//   req.io.emit("message", `Hello, ${req.originalUrl}`);
+
+// });
+
 //enable CORS
 app.use(cors());
 
@@ -77,7 +92,7 @@ app.use(hpp());
 app.use("/api/v1/frontdesk", frontdesk);
 app.use("/api/v1/staff", employee);
 app.use("/api/v1/guest", newGuest);
-app.use("/api/v1/returning", oldGuest);
+app.use("/api/v1/returning", socketIOMiddleware, oldGuest);
 app.use("/api/v1/prebook", prebook);
 app.use("/api/v1/log", log);
 
@@ -94,7 +109,8 @@ app.get("/*", function (req, res) {
 });
 
 const PORT = process.env.PORT || 8000;
-const server = app.listen(
+
+const server = i.listen(
   PORT,
   console.log(
     `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow

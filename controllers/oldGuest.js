@@ -114,15 +114,20 @@ exports.approveVisitor = asyncHandler(async (req, res, next) => {
   if (!visitors) {
     return next(new ErrorResponse("An Error Occured, Try Again", 400));
   }
-  client.messages
-    .create({
-      body: `Hi ${serviceDesk.firstname}!,  ${req.body.name} has been approved by ${req.staff.name}`,
-      messagingServiceSid: `${process.env.TWILIO_SID}`,
-      from: "VMS",
-      to: `+234${serviceDesk.mobile}`,
-    })
-    .then((message) => console.log(message.sid))
-    .done();
+  // client.messages
+  //   .create({
+  //     body: `Hi ${serviceDesk.firstname}!,  ${req.body.name} has been approved by ${req.staff.name}`,
+  //     messagingServiceSid: `${process.env.TWILIO_SID}`,
+  //     from: "VMS",
+  //     to: `+234${serviceDesk.mobile}`,
+  //   })
+  //   .then((message) => console.log(message.sid))
+  //   .done();
+
+  req.io.emit(
+    "aprroved",
+    `Hi ${serviceDesk.firstname}!,  ${req.body.name} has been approved by ${req.staff.name}`
+  );
   res.status(200).json({ success: true });
 });
 
@@ -147,15 +152,19 @@ exports.rejectVisitor = asyncHandler(async (req, res, next) => {
   if (!visitors) {
     return next(new ErrorResponse("An Error Occured, Try Again", 400));
   }
-  client.messages
-    .create({
-      body: `Hi ${serviceDesk.firstname}!,  ${req.body.name} has been rejected by ${req.staff.name}`,
-      messagingServiceSid: `${process.env.TWILIO_SID}`,
-      from: "VMS",
-      to: `+234${serviceDesk.mobile}`,
-    })
-    .then((message) => console.log(message.sid))
-    .done();
+  // client.messages
+  //   .create({
+  //     body: `Hi ${serviceDesk.firstname}!,  ${req.body.name} has been rejected by ${req.staff.name}`,
+  //     messagingServiceSid: `${process.env.TWILIO_SID}`,
+  //     from: "VMS",
+  //     to: `+234${serviceDesk.mobile}`,
+  //   })
+  //   .then((message) => console.log(message.sid))
+  //   .done();
+  req.io.emit(
+    "aprroved",
+    `Hi ${serviceDesk.firstname}!,  ${req.body.name} has been rejected by ${req.staff.name}`
+  );
   res.status(200).json({ success: true });
 });
 
