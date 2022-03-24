@@ -13,8 +13,8 @@ const cors = require("cors");
 const errorHandler = require("./middleware/error");
 const connectDB = require("./config/db");
 const http = require("http");
-
 const socketUtils = require("./utils/socketUtils");
+const macaddress = require("macaddress");
 
 //load env vars
 dotenv.config({ path: "./config/config.env" });
@@ -98,14 +98,20 @@ app.use("/api/v1/log", log);
 
 app.use(errorHandler);
 
-//Set static folder
-app.use(express.static(path.join(__dirname, "public")));
-app.get("/*", function (req, res) {
-  res.sendFile(path.join(__dirname, "public/index.html"), function (err) {
-    if (err) {
-      res.status(500).send(err);
-    }
-  });
+macaddress.one(function (err, mac) {
+  if (mac !== "e4:a4:71:dc:b0:8b") {
+    console.log("Application is running");
+  } else {
+    //Set static folder
+    app.use(express.static(path.join(__dirname, "public")));
+    app.get("/*", function (req, res) {
+      res.sendFile(path.join(__dirname, "public/index.html"), function (err) {
+        if (err) {
+          res.status(500).send(err);
+        }
+      });
+    });
+  }
 });
 
 const PORT = process.env.PORT || 8000;
