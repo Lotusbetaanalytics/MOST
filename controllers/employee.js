@@ -120,7 +120,7 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
   //Create reset url
   const resetUrl = `${req.protocol}://${req.get(
     "host"
-  )}/resetPassword/${resetToken}`;
+  )}/staff/resetPassword/${resetToken}`;
 
   const salutation = `Hello There!`;
   const content = ` You are receiving this email because you (or someone else) has requested
