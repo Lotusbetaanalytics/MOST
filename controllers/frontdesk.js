@@ -8,6 +8,7 @@ const crypto = require("crypto");
 // @route   POST/api/v1/frontdesk/
 // @access   Private/Admin
 exports.createFrontdesk = asyncHandler(async (req, res, next) => {
+  req.body.email = req.body.email.toLowerCase();
   const frontdesk = await Frontdesk.create(req.body);
   res.status(201).json({
     success: true,
@@ -26,8 +27,9 @@ exports.getFrontdesk = asyncHandler(async (req, res, next) => {
 // @route   POST/api/v1/frontdesk/login
 // @access   Public
 exports.login = asyncHandler(async (req, res, next) => {
-  const { email, password } = req.body;
+  let { email, password } = req.body;
 
+  email = email.toLowerCase();
   //validate email & password
   if (!email || !password) {
     return next(new ErrorResponse("Please Provide an email and password", 400));
