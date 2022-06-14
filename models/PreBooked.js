@@ -22,6 +22,11 @@ const PreBookedSchema = new mongoose.Schema({
     ref: "Employee",
     required: [true, "Please add host"],
   },
+  location: {
+    type: mongoose.Schema.ObjectId,
+    ref: "Location",
+    required: [true, "Please add location"],
+  },
   photo: {
     type: String,
   },

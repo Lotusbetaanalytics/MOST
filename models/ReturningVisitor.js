@@ -64,6 +64,11 @@ const ReturningVisitorSchema = new mongoose.Schema({
   tag: {
     type: String,
   },
+  location: {
+    type: mongoose.Schema.ObjectId,
+    ref: "Location",
+    required: [true, "Please add location"],
+  },
   staff: {
     type: mongoose.Schema.ObjectId,
     ref: "Frontdesk",

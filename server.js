@@ -24,6 +24,7 @@ const newGuest = require("./routes/newGuest");
 const oldGuest = require("./routes/oldGuest");
 const prebook = require("./routes/prebook");
 const log = require("./routes/logs");
+const location = require("./routes/location");
 
 const app = express();
 if (process.env.NODE_ENV === "development") {
@@ -65,6 +66,7 @@ app.use("/api/v1/guest", newGuest);
 app.use("/api/v1/returning", socketIOMiddleware, oldGuest);
 app.use("/api/v1/prebook", prebook);
 app.use("/api/v1/log", log);
+app.use("/api/v1/location", location);
 app.use(errorHandler);
 
 jasper(app);

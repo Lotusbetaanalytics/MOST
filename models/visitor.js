@@ -46,6 +46,11 @@ const VisitorSchema = new mongoose.Schema({
     type: String,
     default: "no-photo.jpg",
   },
+  location: {
+    type: mongoose.Schema.ObjectId,
+    ref: "Location",
+    required: [true, "Please add location"],
+  },
   createdAt: {
     type: Date,
     default: Date.now,

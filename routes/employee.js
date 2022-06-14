@@ -17,7 +17,7 @@ const router = express.Router();
 
 router
   .route("/")
-  .post(createEmployee)
+  .post(protect, createEmployee)
   .get(advancedResults(Employee), getEmployees);
 router.route("/login").post(login);
 router.route("/me").get(protects, getMe);

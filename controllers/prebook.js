@@ -30,6 +30,7 @@ exports.verifyToken = asyncHandler(async (req, res, next) => {
 // @route   POST/api/v1/prebook
 // @access   Private/Admin
 exports.prebook = asyncHandler(async (req, res, next) => {
+  req.body.location = req.frontdesk.location;
   const code = otpGenerator.generate(6, {
     upperCase: false,
     specialChars: false,
@@ -88,6 +89,7 @@ exports.getPrebooks = asyncHandler(async (req, res, next) => {
 // @route   POST/api/v1/prebook
 // @access   Private/Admin
 exports.prebookMyGuest = asyncHandler(async (req, res, next) => {
+  req.body.location = req.staff.location;
   const code = otpGenerator.generate(6, {
     upperCase: false,
     specialChars: false,

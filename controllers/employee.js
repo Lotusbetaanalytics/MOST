@@ -8,6 +8,7 @@ const crypto = require("crypto");
 // @route   POST/api/v1/employee/
 // @access   Private/Admin
 exports.createEmployee = asyncHandler(async (req, res, next) => {
+  req.body.location = req.frontdesk.location;
   const staff = await Employee.create(req.body);
   res.status(201).json({
     success: true,

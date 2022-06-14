@@ -26,6 +26,11 @@ const EmployeeSchema = new mongoose.Schema({
     enum: ["Admin", "SuperAdmin"],
     default: "Admin",
   },
+  location: {
+    type: mongoose.Schema.ObjectId,
+    ref: "Location",
+    required: [true, "Please add location"],
+  },
   password: {
     type: String,
     required: [true, "Please add a password"],

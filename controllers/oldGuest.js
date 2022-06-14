@@ -30,6 +30,7 @@ exports.getVisitors = asyncHandler(async (req, res, next) => {
 // @route   POST/api/v1/visitors/
 // @access   Private
 exports.newVisitor = asyncHandler(async (req, res, next) => {
+  req.body.location = req.frontdesk.location;
   const user = await Visitor.findById(req.body.user);
   const host = await Employee.findById(req.body.host);
   const approve = `${req.protocol}://${req.get("host")}/staff/`;
@@ -87,6 +88,7 @@ exports.newVisitor = asyncHandler(async (req, res, next) => {
       date: req.body.date,
       status: "Awaiting Host",
       staff: req.frontdesk.id,
+      location: req.frontdesk.location,
     });
     res.status(201).json({ success: true, data: "Email Sent" });
   } catch (err) {

@@ -18,6 +18,7 @@ const client = require("twilio")(accountSid, authToken);
 // @route   POST/api/v1/guest/
 // @access   Private
 exports.newVisitor = asyncHandler(async (req, res, next) => {
+  req.body.location = req.frontdesk.location;
   const host = await Employee.findById(req.body.host);
   const approve = `${req.protocol}://${req.get("host")}/staff/`;
 
